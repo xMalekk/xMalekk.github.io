@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malek Abbes | Offensive Security</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <a href="#" class="logo">~/xMalekk</a>
+        <div class="nav-links">
+            <a href="#about">About</a>
+            <a href="#certs">Certs</a>
+            <a href="#projects">Projects</a>
+            <a href="#writeups">Writeups</a>
+            <a href="#contact">Contact</a>
+        </div>
+        <button class="nav-toggle" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="hero-inner">
+        <div class="terminal-line"><span class="prompt">$</span> whoami</div>
+        <h1>Malek Abbes</h1>
+        <p class="subtitle">Offensive Security &middot; Red Teaming &middot; Penetration Testing</p>
+        <p class="bio">4th-year Cybersecurity Engineering student at <strong>INSA Centre Val de Loire</strong>. Certified <strong>CRTO</strong>, <strong>eJPTv2</strong> &amp; <strong>CAPen</strong>. Active bug bounty hunter, CTF player, and <strong>TryHackMe top 2%</strong>.</p>
+        <div class="hero-badges">
+            <span class="badge">CRTO</span>
+            <span class="badge">eJPTv2</span>
+            <span class="badge">CAPen</span>
+            <span class="badge">THM Top 2%</span>
+        </div>
+        <div class="hero-cta">
+            <a href="#contact" class="btn btn-primary">Get in touch</a>
+            <a href="https://github.com/xMalekk" class="btn btn-ghost" target="_blank" rel="noopener">GitHub</a>
+        </div>
+    </div>
+</section>
+
+<section id="about" class="section">
+    <div class="container">
+        <h2><span class="accent">#</span> About</h2>
+        <div class="about-grid">
+            <div class="about-text">
+                <p>I'm a cybersecurity engineering student passionate about breaking things to make them safer. My focus areas are <strong>offensive security</strong>, <strong>penetration testing</strong>, and <strong>red team operations</strong>.</p>
+                <p>I actively hunt bugs on <strong>Intigriti</strong>, solve machines on <strong>HackTheBox</strong> and <strong>TryHackMe</strong>, and build security tooling. I enjoy the full attack chain: from recon to post-exploitation.</p>
+                <p>Currently seeking a <strong>4-6 month cybersecurity internship starting April 2027</strong>, with the possibility of extending into an apprenticeship.</p>
+            </div>
+            <div class="about-stats">
+                <div class="stat">
+                    <span class="stat-value">3</span>
+                    <span class="stat-label">Certifications</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">Top 2%</span>
+                    <span class="stat-label">TryHackMe</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">3</span>
+                    <span class="stat-label">Languages</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="certs" class="section section-alt">
+    <div class="container">
+        <h2><span class="accent">#</span> Certifications</h2>
+        <div class="cert-grid">
+            <div class="cert-card">
+                <div class="cert-icon">&#x1f6e1;</div>
+                <h3>CRTO</h3>
+                <p class="cert-full">Certified Red Team Operator</p>
+                <p class="cert-org">Zero-Point Security &middot; 2026</p>
+                <div class="cert-tags">
+                    <span>Active Directory</span>
+                    <span>Cobalt Strike</span>
+                    <span>Lateral Movement</span>
+                    <span>OPSEC</span>
+                </div>
+            </div>
+            <div class="cert-card">
+                <div class="cert-icon">&#x1f50d;</div>
+                <h3>eJPTv2</h3>
+                <p class="cert-full">Junior Penetration Tester</p>
+                <p class="cert-org">INE Security &middot; 2026</p>
+                <div class="cert-tags">
+                    <span>Network Pentesting</span>
+                    <span>Web Attacks</span>
+                    <span>Privilege Escalation</span>
+                </div>
+            </div>
+            <div class="cert-card">
+                <div class="cert-icon">&#x1f578;</div>
+                <h3>CAPen</h3>
+                <p class="cert-full">Certified AppSec Pentester</p>
+                <p class="cert-org">The SecOps Group &middot; 2026</p>
+                <div class="cert-tags">
+                    <span>OWASP Top 10</span>
+                    <span>SQLi</span>
+                    <span>XSS</span>
+                    <span>SSRF</span>
+                    <span>API Security</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="projects" class="section">
+    <div class="container">
+        <h2><span class="accent">#</span> Projects</h2>
+        <div class="project-grid">
+            <div class="project-card">
+                <div class="project-header">
+                    <h3>Automated Pentest Platform</h3>
+                    <a href="https://github.com/xMalekk/projet5-pentest-platform" target="_blank" rel="noopener" class="project-link" title="View on GitHub">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                    </a>
+                </div>
+                <p>Multi-node Docker platform for isolated pentesting environments. One user = one container (Kali/Parrot/Ubuntu). Ansible provisioning, Traefik reverse proxy, CI/CD pipeline.</p>
+                <div class="tech-tags">
+                    <span>Python</span><span>Flask</span><span>Docker</span><span>Ansible</span><span>Vagrant</span><span>CI/CD</span>
+                </div>
+            </div>
+            <div class="project-card">
+                <div class="project-header">
+                    <h3>Image Certification via Steganography</h3>
+                </div>
+                <p>Web application for image authenticity certification and verification using steganography. Secure auth, image repository management, and email notifications.</p>
+                <div class="tech-tags">
+                    <span>Python</span><span>Flask</span><span>SQLite</span><span>Docker</span><span>OpenStego</span>
+                </div>
+            </div>
+            <div class="project-card">
+                <div class="project-header">
+                    <h3>MedievAIl &mdash; AI Battle Simulation</h3>
+                    <a href="https://github.com/xMalekk/Projet-en-programmation-reseau-et-systeme" target="_blank" rel="noopener" class="project-link" title="View on GitHub">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                    </a>
+                </div>
+                <p>Real-time combat engine with AI-driven strategies, client-server network architecture, ASCII and isometric 2.5D rendering, tournament system.</p>
+                <div class="tech-tags">
+                    <span>Python</span><span>C</span><span>Networking</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="writeups" class="section section-alt">
+    <div class="container">
+        <h2><span class="accent">#</span> Writeups</h2>
+        <p class="section-desc">CTF challenges, HackTheBox machines, and bug bounty case studies.</p>
+        <div class="writeup-grid">
+            <a href="https://github.com/xMalekk/intigriti-0926-writeup" target="_blank" rel="noopener" class="writeup-card">
+                <div class="writeup-meta">
+                    <span class="writeup-type ctf">CTF</span>
+                    <span class="writeup-date">Sep 2026</span>
+                </div>
+                <h3>Intigriti September 2026 Challenge</h3>
+                <p>UNION-based SQL Injection in Critter Gallery</p>
+                <div class="tech-tags">
+                    <span>SQLi</span><span>Web</span>
+                </div>
+            </a>
+        </div>
+        <p class="writeup-note">More writeups coming as machines retire and challenges close.</p>
+    </div>
+</section>
+
+<section id="skills" class="section">
+    <div class="container">
+        <h2><span class="accent">#</span> Skills &amp; Tools</h2>
+        <div class="skills-grid">
+            <div class="skill-group">
+                <h3>Offensive Security</h3>
+                <div class="skill-tags">
+                    <span>Penetration Testing</span>
+                    <span>Red Teaming</span>
+                    <span>Active Directory</span>
+                    <span>Vulnerability Research</span>
+                    <span>MITRE ATT&CK</span>
+                    <span>C2 Frameworks</span>
+                    <span>Adversary Emulation</span>
+                </div>
+            </div>
+            <div class="skill-group">
+                <h3>Tools</h3>
+                <div class="skill-tags">
+                    <span>Burp Suite</span>
+                    <span>Cobalt Strike</span>
+                    <span>Nmap</span>
+                    <span>Metasploit</span>
+                    <span>Wireshark</span>
+                    <span>Ghidra</span>
+                    <span>Bloodhound</span>
+                </div>
+            </div>
+            <div class="skill-group">
+                <h3>Development</h3>
+                <div class="skill-tags">
+                    <span>Python</span>
+                    <span>C</span>
+                    <span>Bash</span>
+                    <span>SQL</span>
+                    <span>JavaScript</span>
+                    <span>Docker</span>
+                    <span>Ansible</span>
+                    <span>Git</span>
+                </div>
+            </div>
+            <div class="skill-group">
+                <h3>Platforms</h3>
+                <div class="skill-tags">
+                    <span>Linux</span>
+                    <span>Windows</span>
+                    <span>macOS</span>
+                    <span>HackTheBox</span>
+                    <span>TryHackMe</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="contact" class="section section-alt">
+    <div class="container">
+        <h2><span class="accent">#</span> Contact</h2>
+        <p class="section-desc">Interested in working together or have a question? Reach out.</p>
+        <div class="contact-links">
+            <a href="mailto:malek.abb55@gmail.com" class="contact-card">
+                <span class="contact-icon">&#9993;</span>
+                <span>malek.abb55@gmail.com</span>
+            </a>
+            <a href="https://linkedin.com/in/malek-abbes-insa" target="_blank" rel="noopener" class="contact-card">
+                <span class="contact-icon">in</span>
+                <span>LinkedIn</span>
+            </a>
+            <a href="https://github.com/xMalekk" target="_blank" rel="noopener" class="contact-card">
+                <span class="contact-icon">&lt;/&gt;</span>
+                <span>GitHub</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2026 Malek Abbes &mdash; Built with discipline, not frameworks.</p>
+    </div>
+</footer>
+
+<script>
+const toggle = document.querySelector('.nav-toggle');
+const links = document.querySelector('.nav-links');
+toggle.addEventListener('click', () => {
+    links.classList.toggle('open');
+    toggle.classList.toggle('open');
+});
+document.querySelectorAll('.nav-links a').forEach(a => {
+    a.addEventListener('click', () => {
+        links.classList.remove('open');
+        toggle.classList.remove('open');
+    });
+});
+</script>
+
+</body>
+</html>

